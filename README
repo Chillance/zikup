@@ -1,0 +1,38 @@
+
+zikup
+-----
+
+I wanted a tool that would backup files into an archive and have the date
+and keep latest X files. I didn't find anything usable, so I thought I
+write it myself!
+
+zikup = zip + backup in case someone wonders. :)
+
+It's currently using 7-zip to compress and create the archive. This can
+obviously be changed to use a module or something else later, but it's
+fine for me now as this tool exists in both Windows and Linux.
+
+zikup <backup path> <projectname> <total amount of archives> <files_or_paths...>
+
+ <backup path> - Path where the backup (archive) is supposed to be.
+ <projectname> - Name of the arhicve. It will end up like so:
+                   projectname_YYYY-MM-DD_HH.MM.SS.zip where
+                      YYYY is year,
+                      MM is month,
+                      DD is date,
+                      HH is hour,
+                      MM is minute,
+                      SS is seconds.
+ <total amount of archives> - Amount of archives to keep. Currently it will
+                              create the archive before deleting the oldest
+                              one, if the current archiving works.
+                              Not sure we want this, or delete the file
+                              first...
+ <files_or_paths> - What to archive. Can be either a path to a directory or
+                    a file. Also, this can be repeated to include several
+                    files or paths.
+
+
+Enjoy,
+Chillance
+

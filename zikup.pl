@@ -35,7 +35,7 @@ use strict;
 
 my ($second, $minute, $hour, $dayOfMonth, $month, $yearOffset, $dayOfWeek, $dayOfYear, $daylightSavings) = localtime();
 
-$month = sprintf("%02d", $month);
+$month = sprintf("%02d", $month + 1);
 $dayOfMonth = sprintf("%02d", $dayOfMonth);
 $dayOfMonth = sprintf("%02d", $dayOfMonth);
 $hour = sprintf("%02d", $hour);
@@ -73,7 +73,8 @@ my $projects = {$ARGV[1] => {'backup_location' => $global_backup_location, 'to_b
 
 
 my $zip_tool_to_use = "7-zip";
-my $zip_tools = { '7-zip' => "7z a -mx=9 !zipfile! !to_backup!"};
+#my $zip_tools = { '7-zip' => "7z a -mx=9 !zipfile! !to_backup!"};
+my $zip_tools = { '7-zip' => "7z a -ppassword -mx=9 -mhe=on !zipfile! !to_backup!"};
 
 
 foreach my $project (keys(%$projects)) {
@@ -81,9 +82,9 @@ foreach my $project (keys(%$projects)) {
   my $backup_location = $projects->{$project}->{'backup_location'} || $global_backup_location;
 
   # Get all possible backups.
-  my @files = sort(glob("$backup_location/*.zip"));
+  my @files = sort(glob("$backup_location/*.7z"));
   # Filter out only backups for the project.
-  @files = map($_ =~ /$project\_\d{4}-\d{2}-\d{2}\_\d{2}\.\d{2}.\d{2}\.zip/g, @files);
+  @files = map($_ =~ /^$project\_\d{4}-\d{2}-\d{2}\_\d{2}\.\d{2}.\d{2}\.7z/g, @files);
 
   if (@files) {
     print "Found backup files:\n";
@@ -92,7 +93,18 @@ foreach my $project (keys(%$projects)) {
     }
   }
 
-  my $new_backup = $project . "_" . ($yearOffset+1900) . "-$month-" . $dayOfMonth . "_$hour.$minute.$second.zip";
+  # This is done first, to make it possible to backup on a full hdd. This way, it should be freed up for another
+  # backup. And thus, we will have a backup with latest data in it. Otherwise it will not be able to create the
+  # backup file. Also, a backup is only removed when a certain amount is reached, so there should always be
+  # atleast one backup... (if the value here is set to atleast 2)...
+  # Obviously, this is a problem if data is filling the hdd after the backup is deleted!
+  if (scalar(@files) >= $ARGV[2]) {
+    print "Deleting oldest: " . $backup_location . "/" . $files[0] . "...";
+    unlink($global_backup_location . "/" . $files[0]) or die("$!\n");
+    print " done.\n";
+  }
+
+  my $new_backup = $project . "_" . ($yearOffset+1900) . "-$month-" . $dayOfMonth . "_$hour.$minute.$second.7z";
   $new_backup = $backup_location . "/$new_backup";
   $new_backup =~ s/\/\//\//g;
 
@@ -120,15 +132,7 @@ foreach my $project (keys(%$projects)) {
   print $project . ": $zip\n";
   my $error = system($zip);
   if (!$error) {
-    if (scalar(@files) >= $ARGV[2]) {
-      print "Deleting oldest: " . $backup_location . "/" . $files[0] . "...";
-      unlink($global_backup_location . "/" . $files[0]) or die("$!\n");
-      print " done.\n";
-    }
   }
 }
-
-
-
 
 

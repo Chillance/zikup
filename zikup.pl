@@ -47,8 +47,8 @@ print("zikup v0.1\n");
 print("----------\n");
 
 
-if ($#ARGV < 3) {
-  print("Usage: zikup <backup path> <projectname> <total amount of archives> <files_or_paths...>\n\n");
+if ($#ARGV < 4) {
+  print("Usage: zikup <backup path> <projectname> <total amount of archives> <password> <files_or_paths...>\n\n");
   exit(0);
 }
 else {
@@ -60,7 +60,7 @@ else {
 
 
 my $to_backup_global = "";
-for (my $i = 3; $i <= $#ARGV; ++$i) {
+for (my $i = 4; $i <= $#ARGV; ++$i) {
   if (!-e $ARGV[$i]) {
     print("\"" . $ARGV[$i] . "\" doesn't exist.\n");
     exit(1);
@@ -71,10 +71,11 @@ for (my $i = 3; $i <= $#ARGV; ++$i) {
 my $global_backup_location = $ARGV[0];
 my $projects = {$ARGV[1] => {'backup_location' => $global_backup_location, 'to_backup' => $to_backup_global}};
 
+my $password = $ARGV[3];
 
 my $zip_tool_to_use = "7-zip";
 #my $zip_tools = { '7-zip' => "7z a -mx=9 !zipfile! !to_backup!"};
-my $zip_tools = { '7-zip' => "7z a -ppassword -mx=9 -mhe=on !zipfile! !to_backup!"};
+my $zip_tools = { '7-zip' => "7z a -p$password -mx=9 -mhe=on !zipfile! !to_backup!"};
 
 
 foreach my $project (keys(%$projects)) {
@@ -84,7 +85,7 @@ foreach my $project (keys(%$projects)) {
   # Get all possible backups.
   my @files = sort(glob("$backup_location/*.7z"));
   # Filter out only backups for the project.
-  @files = map($_ =~ /^$project\_\d{4}-\d{2}-\d{2}\_\d{2}\.\d{2}.\d{2}\.7z/g, @files);
+  @files = map($_ =~ /\/$project\_\d{4}-\d{2}-\d{2}\_\d{2}\.\d{2}.\d{2}\.7z/g, @files);
 
   if (@files) {
     print "Found backup files:\n";

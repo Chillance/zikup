@@ -28,6 +28,7 @@ zikup <backup path> <projectname> <total amount of archives> <files_or_paths...>
                               one, if the current archiving works.
                               Not sure we want this, or delete the file
                               first...
+ <password>       - This is the password which will be used when creating the 7z archive.
  <files_or_paths> - What to archive. Can be either a path to a directory or
                     a file. Also, this can be repeated to include several
                     files or paths.
